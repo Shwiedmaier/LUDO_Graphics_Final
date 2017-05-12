@@ -1,7 +1,7 @@
 {
   "SaveName": "Ludo_TTS",
   "GameMode": "Ludo_TTS",
-  "Date": "5/12/2017 3:20:40 PM",
+  "Date": "5/12/2017 3:38:50 PM",
   "Table": "Table_Square",
   "Sky": "Sky_Cathedral",
   "Note": "",
@@ -32,26 +32,26 @@
         "Color": "Purple",
         "Transform": {
           "posX": 14.3612537,
-          "posY": 2.97121048,
+          "posY": 2.97197342,
           "posZ": 0.0530046746,
           "rotX": 0.0,
-          "rotY": 270.337677,
+          "rotY": 270.3378,
           "rotZ": 0.0,
-          "scaleX": 9.392743,
+          "scaleX": 9.392736,
           "scaleY": 6.63386965,
-          "scaleZ": 3.52227855
+          "scaleZ": 3.52227688
         }
       },
       {
         "Color": "White",
         "Transform": {
-          "posX": -0.0714253,
-          "posY": 2.97121048,
-          "posZ": -14.3740511,
+          "posX": -0.07142709,
+          "posY": 2.97197342,
+          "posZ": -14.3743629,
           "rotX": 0.0,
           "rotY": 0.33760643,
           "rotZ": 0.0,
-          "scaleX": 9.392764,
+          "scaleX": 9.392879,
           "scaleY": 6.6338706,
           "scaleZ": 3.52227879
         }
@@ -59,22 +59,22 @@
       {
         "Color": "Green",
         "Transform": {
-          "posX": 0.0973775238,
-          "posY": 2.97121048,
-          "posZ": 14.2734623,
+          "posX": 0.0973782539,
+          "posY": 2.97197342,
+          "posZ": 14.2739658,
           "rotX": 0.0,
-          "rotY": 180.337631,
+          "rotY": 180.337662,
           "rotZ": 0.0,
           "scaleX": 9.392743,
           "scaleY": 6.63386965,
-          "scaleZ": 3.522284
+          "scaleZ": 3.522314
         }
       },
       {
         "Color": "Orange",
         "Transform": {
           "posX": -14.3107786,
-          "posY": 2.97121048,
+          "posY": 2.97197342,
           "posZ": 0.0223537926,
           "rotX": 0.0,
           "rotY": 90.337616,
@@ -88,7 +88,539 @@
   },
   "DrawImage": "iVBORw0KGgoAAAANSUhEUgAAAWAAAADQCAYAAAA53LuNAAAFFElEQVR4Ae3QgQAAAADDoPlTH+SFUGHAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgwYMGDAgAEDBgy8DQx5DAABHyNK3wAAAABJRU5ErkJggg==",
   "VectorLines": [],
-  "ObjectStates": [],
+  "ObjectStates": [
+    {
+      "Name": "Custom_Board",
+      "Transform": {
+        "posX": 0.0,
+        "posY": 0.9220247,
+        "posZ": 0.0,
+        "rotX": 0.0,
+        "rotY": 180.000031,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.7867647,
+        "g": 0.7867647,
+        "b": 0.7867647
+      },
+      "Locked": true,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "CustomImage": {
+        "ImageURL": "http://cloud-3.steamusercontent.com/ugc/824567564820581150/DDD28B62A9D5487152418228C761540DD865A8B5/",
+        "ImageSecondaryURL": "",
+        "WidthScale": 1.0
+      },
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "9f2659"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": -6.80591965,
+        "posY": 1.51608968,
+        "posZ": -6.205188,
+        "rotX": 0.000781011,
+        "rotY": 90.00081,
+        "rotZ": 8.356392E-07,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.7867647,
+        "g": 0.732506037,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 3,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "a0f471"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": -4.237011,
+        "posY": 1.51609242,
+        "posZ": -6.284502,
+        "rotX": 0.0005833866,
+        "rotY": 90.00354,
+        "rotZ": -2.260692E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.7867647,
+        "g": 0.732506037,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 3,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "b8df3f"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": -2.898495,
+        "posY": 1.51610041,
+        "posZ": -6.14598036,
+        "rotX": -6.239918E-05,
+        "rotY": 89.9986954,
+        "rotZ": -1.62900033E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.7867647,
+        "g": 0.732506037,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 3,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "4458db"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": -5.45595837,
+        "posY": 1.51608837,
+        "posZ": -6.224966,
+        "rotX": 0.0008766018,
+        "rotY": 90.00314,
+        "rotZ": 1.11337367E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.7867647,
+        "g": 0.732506037,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 3,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "a9658e"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": 5.30500174,
+        "posY": 1.51610744,
+        "posZ": 2.99083138,
+        "rotX": -0.0005201968,
+        "rotY": 90.00041,
+        "rotZ": 1.44989081E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.838235259,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 1,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "9bd478"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": 2.74207282,
+        "posY": 1.516102,
+        "posZ": 3.08459616,
+        "rotX": -8.109154E-05,
+        "rotY": 90.00144,
+        "rotZ": -3.44051455E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.838235259,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 1,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "d11444"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": 4.080993,
+        "posY": 1.51609182,
+        "posZ": 3.04282522,
+        "rotX": 0.000699741533,
+        "rotY": 90.00246,
+        "rotZ": -1.00169373E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.838235259,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 1,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "06e2ed"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": 6.612354,
+        "posY": 1.51610589,
+        "posZ": 2.99253631,
+        "rotX": -0.0003760518,
+        "rotY": 90.00078,
+        "rotZ": -8.018197E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.838235259,
+        "g": 0.0,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 1,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "dd392c"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": -4.202751,
+        "posY": 1.516088,
+        "posZ": 2.99757,
+        "rotX": 0.000965335756,
+        "rotY": 89.99485,
+        "rotZ": -2.02617521E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.0,
+        "g": 0.6985294,
+        "b": 0.00481740525
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 4,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "51d02b"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": -5.457734,
+        "posY": 1.51611519,
+        "posZ": 3.021963,
+        "rotX": -0.001062528,
+        "rotY": 89.99925,
+        "rotZ": 6.57229566E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.0,
+        "g": 0.6985294,
+        "b": 0.00481740525
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 4,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "05a7b5"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": -6.680398,
+        "posY": 1.51608741,
+        "posZ": 2.92357063,
+        "rotX": 0.00101170677,
+        "rotY": 90.00264,
+        "rotZ": -6.613932E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.0,
+        "g": 0.6985294,
+        "b": 0.00481740525
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 4,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "8e7868"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": -2.92869544,
+        "posY": 1.5161016,
+        "posZ": 3.008407,
+        "rotX": -6.84558E-05,
+        "rotY": 90.00176,
+        "rotZ": -2.12924115E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.0,
+        "g": 0.6985294,
+        "b": 0.00481740525
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 4,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "59d3f0"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": 6.60172033,
+        "posY": 1.51608634,
+        "posZ": -6.237707,
+        "rotX": 0.00102560536,
+        "rotY": 90.00237,
+        "rotZ": -2.76951687E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.0,
+        "g": 0.1724138,
+        "b": 1.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 5,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "58b3d5"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": 2.761277,
+        "posY": 1.51608157,
+        "posZ": -6.272241,
+        "rotX": 0.00137374026,
+        "rotY": 90.00379,
+        "rotZ": -5.16146338E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.0,
+        "g": 0.1724138,
+        "b": 1.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 5,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "76d966"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": 5.291114,
+        "posY": 1.51609206,
+        "posZ": -6.28448534,
+        "rotX": 0.0005677675,
+        "rotY": 90.00518,
+        "rotZ": -6.523181E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.0,
+        "g": 0.1724138,
+        "b": 1.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 5,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "21ba3b"
+    },
+    {
+      "Name": "PlayerPawn",
+      "Transform": {
+        "posX": 4.03216267,
+        "posY": 1.51608014,
+        "posZ": -6.27162647,
+        "rotX": 0.00151247508,
+        "rotY": 90.0035248,
+        "rotZ": 1.09840485E-05,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.0,
+        "g": 0.1724138,
+        "b": 1.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 5,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "0c4967"
+    }
+  ],
   "DecalPallet": [],
   "TabStates": {
     "0": {
