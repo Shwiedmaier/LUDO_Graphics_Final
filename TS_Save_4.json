@@ -1,13 +1,13 @@
 {
   "SaveName": "Ludo_TTS",
   "GameMode": "Ludo_TTS",
-  "Date": "5/12/2017 3:50:15 PM",
+  "Date": "5/14/2017 1:33:24 AM",
   "Table": "Table_Square",
   "Sky": "Sky_Cathedral",
   "Note": "",
   "Rules": "",
   "PlayerTurn": "",
-  "LuaScript": "--[[ Lua code. See documentation: http://berserk-games.com/knowledgebase/scripting/ --]]\n\n--[[ The OnLoad function. This is called after everything in the game save finishes loading.\nMost of your script code goes here. --]]\nfunction onload()\n    --[[ print('Onload!') --]]\nend\n\n--[[ The Update function. This is called once per frame. --]]\nfunction update ()\n    --[[ print('Update loop!') --]]\nend",
+  "LuaScript": "board = \"9f2659\"\nbag = \"2aa177\"\npieceBag = \"7aae0a\"\nplayers = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nwalls = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\n\nstartingZones = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nstartingZones[\"Blue\"] = \"88711a\"\nstartingZones[\"Green\"] = \"63c0ec\"\nstartingZones[\"Yellow\"] = \"6769bb\"\nstartingZones[\"Red\"] = \"e1e870\"\n\ndie = \"e18fc7\"\nroll = nil\n\nsPos = {}\n\nlastHeld = nil\n\nplayers[\"Red\"] = {\"d11444\", \"06e2ed\", \"9bd478\", \"dd392c\"}\nplayers[\"Green\"] = {\"59d3f0\", \"51d02b\", \"05a7b5\", \"8e7868\"}\nplayers[\"Blue\"] = {\"58b3d5\", \"21ba3b\", \"0c4967\", \"76d966\"}\nplayers[\"Yellow\"] = {\"4458db\", \"b8df3f\", \"a9658e\", \"a0f471\"}\n\ncurrentPlayer = nil\npreviousPlayer = nil\n\nwallPickupPosition = nil\n\nwinZone = \"a2fb3d\"\nobjectInWinZone = false\n\nfunction onLoad(save_state)\n    print \"test\"\n    sPos = {}\n    -- set current player to first from list of seated, since host always goes first\n    currentPlayer = getSeatedPlayers()[1]\nend\n\nfunction onObjectPickedUp(player_color, picked_up_object)\n    lastHeld = picked_up_object\n\n    if isPlayersPiece(player_color, picked_up_object) and currentPlayer == player_color then\n        print \"woohoo\"\n    elseif isPlayersWall(player_color, picked_up_object) and currentPlayer == player_color then\n        wallPickupPosition = picked_up_object.getPosition()\n    else picked_up_object.reload() end\nend\n\nfunction onObjectDropped(player_color, dropped_object)\n    if isPlayersWall(player_color, dropped_object) and getWallMoveDistance(dropped_object, wallPickupPosition) then\n        pieces = getObjectFromGUID(pieceBag).getObjects()\n        local count = 0\n\n        for i = 1, tableLength(pieces), 1 do\n            if isPlayersPieceFromGUID(player_color, pieces[i].guid) then\n                params = {}\n\n                if count == 0 then\n                    params.position = wallPickupPosition\n                elseif count == 1 then\n                    params.position = dropped_object.getPosition()\n                else\n                    break\n                end\n\n                params.guid = pieces[i].guid\n                o = getObjectFromGUID(pieceBag).takeObject(params)\n                -- o.setTable(\"startingPos\", sPos[o.getGUID()])\n                count = count + 1\n            end\n        end\n\n        dropped_object.destruct()\n    elseif isPlayersPiece(player_color, dropped_object) and objectInWinZone then dropped_object.destruct() end\nend\n\nfunction onPlayerTurnStart(player_color_start, player_color_previous)\n    -- set current player to this player\n    currentPlayer = player_color_start\n\n    -- set previous player to previous player ;)\n    previousPlayer = player_color_previous\n\n    local objectsInStartingZone = getObjectFromGUID(startingZones[\"Blue\"]).getObjects()\n\n    for i = 1, tableLength(objectsInStartingZone), 1 do\n        objectsInStartingZone[i].lock()\n    end\n\n    math.randomseed(os.clock())\n    local dieObject = getObjectFromGUID(die)\n    local dieVal = math.random(1, 6)\n\n    dieObject.setValue(dieVal)\n\n    if dieVal == 6 then\n        for i = 1, tableLength(objectsInStartingZone), 1 do\n            objectsInStartingZone[i].unlock()\n        end\n    end\nend\n\nfunction onObjectEnterScriptingZone(zone, enter_object)\n    if zone.getGUID() == winZone then\n        getObjectFromGUID(winZone).highlightOn({0, 1, 0})\n        objectInWinZone = true\n    end\nend\n\nfunction onObjectLeaveScriptingZone(zone, leave_object)\n    if zone.getGUID() == winZone then\n        getObjectFromGUID(winZone).highlightOff()\n        objectInWinZone = false\n    end\nend\n\nfunction isPlayersPiece(player_color, picked_up_object)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == picked_up_object.getGUID() then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersPieceFromGUID(player_color, object_GUID)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == object_GUID then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersWall(player_color, picked_up_object)\n\n    if walls[player_color] != nil then\n        print(tableLength(walls[player_color]))\n\n        for i = 1, tableLength(walls[player_color]), 1 do\n            if walls[player_color][i] == picked_up_object.getGUID() then\n                return true\n            end\n        end\n    end\n    return false\nend\n\nfunction getWallMoveDistance(wall_object, old_wall_position)\n    print(old_wall_position['x'])\n    print(wall_object.getPosition()['x'])\n    if math.abs(old_wall_position['x'] - wall_object.getPosition()['x']) > 0.6 then return true\n    elseif math.abs(old_wall_position['z'] - wall_object.getPosition()['z']) > 0.6 then return true\n    else return false end\nend\n\nfunction tableLength(T)\n  local count = 0\n  for _ in pairs(T) do count = count + 1 end\n  return count\nend\n",
   "LuaScriptState": "",
   "Grid": {
     "Type": 0,
@@ -29,29 +29,15 @@
     "Hidding": 0,
     "HandTransforms": [
       {
-        "Color": "Purple",
+        "Color": "Yellow",
         "Transform": {
-          "posX": 14.3612537,
-          "posY": 2.9724884,
-          "posZ": 0.0530046746,
-          "rotX": 0.0,
-          "rotY": 270.3378,
-          "rotZ": 0.0,
-          "scaleX": 9.392736,
-          "scaleY": 6.63386965,
-          "scaleZ": 3.52227688
-        }
-      },
-      {
-        "Color": "White",
-        "Transform": {
-          "posX": -0.07142832,
-          "posY": 2.9724884,
-          "posZ": -14.3745689,
+          "posX": -0.07143085,
+          "posY": 2.97353363,
+          "posZ": -14.374999,
           "rotX": 0.0,
           "rotY": 0.33760643,
           "rotZ": 0.0,
-          "scaleX": 9.392956,
+          "scaleX": 9.393075,
           "scaleY": 6.6338706,
           "scaleZ": 3.52227879
         }
@@ -59,29 +45,43 @@
       {
         "Color": "Green",
         "Transform": {
-          "posX": 0.09737864,
-          "posY": 2.9724884,
-          "posZ": 14.27431,
-          "rotX": 0.0,
-          "rotY": 180.337662,
-          "rotZ": 0.0,
-          "scaleX": 9.392743,
-          "scaleY": 6.63386965,
-          "scaleZ": 3.52233386
-        }
-      },
-      {
-        "Color": "Orange",
-        "Transform": {
           "posX": -14.3107786,
-          "posY": 2.9724884,
-          "posZ": 0.0223537926,
+          "posY": 2.97353363,
+          "posZ": 0.02235379,
           "rotX": 0.0,
           "rotY": 90.337616,
           "rotZ": 0.0,
           "scaleX": 9.392744,
           "scaleY": 6.63386965,
           "scaleZ": 3.5222795
+        }
+      },
+      {
+        "Color": "Red",
+        "Transform": {
+          "posX": 0.09737999,
+          "posY": 2.97353363,
+          "posZ": 14.2750072,
+          "rotX": 0.0,
+          "rotY": 180.337784,
+          "rotZ": 0.0,
+          "scaleX": 9.392743,
+          "scaleY": 6.63386965,
+          "scaleZ": 3.52235174
+        }
+      },
+      {
+        "Color": "Blue",
+        "Transform": {
+          "posX": 14.3612537,
+          "posY": 2.97353363,
+          "posZ": 0.0530046746,
+          "rotX": 0.0,
+          "rotY": 270.337952,
+          "rotZ": 0.0,
+          "scaleX": 9.392734,
+          "scaleY": 6.63386965,
+          "scaleZ": 3.522283
         }
       }
     ]
@@ -96,7 +96,7 @@
         "posY": 0.9220247,
         "posZ": 0.0,
         "rotX": 0.0,
-        "rotY": 180.000031,
+        "rotY": 180.000137,
         "rotZ": 0.0,
         "scaleX": 1.0,
         "scaleY": 1.0,
@@ -122,17 +122,635 @@
       },
       "LuaScript": "",
       "LuaScriptState": "",
-      "GUID": "9f2659"
+      "GUID": "9f2659",
+      "AttachedSnapPoints": [
+        {
+          "Position": {
+            "x": -1.01745868,
+            "y": 0.5922427,
+            "z": 6.324419
+          }
+        },
+        {
+          "Position": {
+            "x": -0.9891745,
+            "y": 0.5922427,
+            "z": 5.24564
+          }
+        },
+        {
+          "Position": {
+            "x": -1.02644575,
+            "y": 0.592242837,
+            "z": 4.21865559
+          }
+        },
+        {
+          "Position": {
+            "x": -0.9916958,
+            "y": 0.592242956,
+            "z": 3.15217876
+          }
+        },
+        {
+          "Position": {
+            "x": -0.9664014,
+            "y": 0.592242956,
+            "z": 2.12981033
+          }
+        },
+        {
+          "Position": {
+            "x": -2.10487127,
+            "y": 0.5922431,
+            "z": 1.06664634
+          }
+        },
+        {
+          "Position": {
+            "x": -3.116607,
+            "y": 0.592242956,
+            "z": 1.06602407
+          }
+        },
+        {
+          "Position": {
+            "x": -4.18769,
+            "y": 0.592242956,
+            "z": 1.07715154
+          }
+        },
+        {
+          "Position": {
+            "x": -5.17439032,
+            "y": 0.592242956,
+            "z": 1.06087458
+          }
+        },
+        {
+          "Position": {
+            "x": -6.215053,
+            "y": 0.592242956,
+            "z": 1.103954
+          }
+        },
+        {
+          "Position": {
+            "x": -7.32416534,
+            "y": 0.592242956,
+            "z": 1.05936491
+          }
+        },
+        {
+          "Position": {
+            "x": -7.35525751,
+            "y": 0.5922432,
+            "z": 0.0238891486
+          }
+        },
+        {
+          "Position": {
+            "x": -7.34606457,
+            "y": 0.5922432,
+            "z": -1.00167882
+          }
+        },
+        {
+          "Position": {
+            "x": -6.200798,
+            "y": 0.5922432,
+            "z": -0.9968818
+          }
+        },
+        {
+          "Position": {
+            "x": -5.156904,
+            "y": 0.5922432,
+            "z": -1.00754774
+          }
+        },
+        {
+          "Position": {
+            "x": -4.129495,
+            "y": 0.5922432,
+            "z": -1.00297344
+          }
+        },
+        {
+          "Position": {
+            "x": -3.06624866,
+            "y": 0.5922432,
+            "z": -0.9954572
+          }
+        },
+        {
+          "Position": {
+            "x": -2.10438466,
+            "y": 0.5922432,
+            "z": -1.01330042
+          }
+        },
+        {
+          "Position": {
+            "x": -1.08489215,
+            "y": 0.5922432,
+            "z": -2.07464957
+          }
+        },
+        {
+          "Position": {
+            "x": -0.981100857,
+            "y": 0.5922432,
+            "z": -3.12503839
+          }
+        },
+        {
+          "Position": {
+            "x": -1.01873076,
+            "y": 0.5922433,
+            "z": -4.175697
+          }
+        },
+        {
+          "Position": {
+            "x": -1.0424372,
+            "y": 0.592243433,
+            "z": -5.2799964
+          }
+        },
+        {
+          "Position": {
+            "x": -1.041738,
+            "y": 0.592243433,
+            "z": -6.284245
+          }
+        },
+        {
+          "Position": {
+            "x": -1.03985071,
+            "y": 0.592243433,
+            "z": -7.283085
+          }
+        },
+        {
+          "Position": {
+            "x": -0.00289662555,
+            "y": 0.592243433,
+            "z": -7.290002
+          }
+        },
+        {
+          "Position": {
+            "x": -0.0164846629,
+            "y": 0.592243433,
+            "z": -6.31309
+          }
+        },
+        {
+          "Position": {
+            "x": 0.0170283131,
+            "y": 0.592243433,
+            "z": -5.2371645
+          }
+        },
+        {
+          "Position": {
+            "x": 0.0133766057,
+            "y": 0.5922433,
+            "z": -4.2135005
+          }
+        },
+        {
+          "Position": {
+            "x": 0.0118372878,
+            "y": 0.5922432,
+            "z": -3.19354177
+          }
+        },
+        {
+          "Position": {
+            "x": 0.0532590821,
+            "y": 0.5922432,
+            "z": -2.08715653
+          }
+        },
+        {
+          "Position": {
+            "x": 1.0445739,
+            "y": 0.5922432,
+            "z": -2.09848952
+          }
+        },
+        {
+          "Position": {
+            "x": 1.01763272,
+            "y": 0.5922432,
+            "z": -3.13752556
+          }
+        },
+        {
+          "Position": {
+            "x": 1.066316,
+            "y": 0.592243433,
+            "z": -4.124935
+          }
+        },
+        {
+          "Position": {
+            "x": 0.989335656,
+            "y": 0.592243433,
+            "z": -5.178217
+          }
+        },
+        {
+          "Position": {
+            "x": 1.08690047,
+            "y": 0.592243433,
+            "z": -6.28481436
+          }
+        },
+        {
+          "Position": {
+            "x": 0.993323,
+            "y": 0.592243433,
+            "z": -7.30497169
+          }
+        },
+        {
+          "Position": {
+            "x": -6.20537,
+            "y": 0.5922431,
+            "z": 0.0405816734
+          }
+        },
+        {
+          "Position": {
+            "x": -5.207301,
+            "y": 0.5922431,
+            "z": 0.0274623353
+          }
+        },
+        {
+          "Position": {
+            "x": -4.135824,
+            "y": 0.5922431,
+            "z": 0.06418553
+          }
+        },
+        {
+          "Position": {
+            "x": -3.11614323,
+            "y": 0.5922431,
+            "z": 0.0311551262
+          }
+        },
+        {
+          "Position": {
+            "x": -2.08546472,
+            "y": 0.5922431,
+            "z": 0.01676606
+          }
+        },
+        {
+          "Position": {
+            "x": 0.0190074984,
+            "y": 0.592242956,
+            "z": 2.13344741
+          }
+        },
+        {
+          "Position": {
+            "x": -0.0245993473,
+            "y": 0.592242956,
+            "z": 3.13001871
+          }
+        },
+        {
+          "Position": {
+            "x": -0.115322493,
+            "y": 0.592242837,
+            "z": 4.191638
+          }
+        },
+        {
+          "Position": {
+            "x": -0.0205168519,
+            "y": 0.5922427,
+            "z": 5.21056938
+          }
+        },
+        {
+          "Position": {
+            "x": 0.0231136512,
+            "y": 0.5922427,
+            "z": 6.33329
+          }
+        },
+        {
+          "Position": {
+            "x": -0.9864357,
+            "y": 0.5922427,
+            "z": 7.315386
+          }
+        },
+        {
+          "Position": {
+            "x": 0.0127509423,
+            "y": 0.5922427,
+            "z": 7.290824
+          }
+        },
+        {
+          "Position": {
+            "x": 0.9615205,
+            "y": 0.5922427,
+            "z": 7.35837746
+          }
+        },
+        {
+          "Position": {
+            "x": 0.9716945,
+            "y": 0.5922427,
+            "z": 6.316203
+          }
+        },
+        {
+          "Position": {
+            "x": 1.0352025,
+            "y": 0.5922427,
+            "z": 5.27150631
+          }
+        },
+        {
+          "Position": {
+            "x": 1.01177573,
+            "y": 0.592242837,
+            "z": 4.23892546
+          }
+        },
+        {
+          "Position": {
+            "x": 0.9932135,
+            "y": 0.592242956,
+            "z": 3.19113278
+          }
+        },
+        {
+          "Position": {
+            "x": 0.969568133,
+            "y": 0.592242956,
+            "z": 2.19379449
+          }
+        },
+        {
+          "Position": {
+            "x": 2.12935543,
+            "y": 0.5922431,
+            "z": 1.05341637
+          }
+        },
+        {
+          "Position": {
+            "x": 3.1618886,
+            "y": 0.592242956,
+            "z": 1.0983305
+          }
+        },
+        {
+          "Position": {
+            "x": 4.291776,
+            "y": 0.592242956,
+            "z": 1.07454085
+          }
+        },
+        {
+          "Position": {
+            "x": 5.237308,
+            "y": 0.592242956,
+            "z": 1.09212875
+          }
+        },
+        {
+          "Position": {
+            "x": 6.28736,
+            "y": 0.5922431,
+            "z": 1.1060307
+          }
+        },
+        {
+          "Position": {
+            "x": 7.363323,
+            "y": 0.592242956,
+            "z": 1.13879049
+          }
+        },
+        {
+          "Position": {
+            "x": 7.348597,
+            "y": 0.5922432,
+            "z": 0.07786839
+          }
+        },
+        {
+          "Position": {
+            "x": 7.24068356,
+            "y": 0.5922451,
+            "z": -0.954001844
+          }
+        },
+        {
+          "Position": {
+            "x": 6.29144,
+            "y": 0.5922432,
+            "z": -0.9785208
+          }
+        },
+        {
+          "Position": {
+            "x": 5.20487738,
+            "y": 0.5922432,
+            "z": -1.03268957
+          }
+        },
+        {
+          "Position": {
+            "x": 4.09329844,
+            "y": 0.5922432,
+            "z": -1.01845849
+          }
+        },
+        {
+          "Position": {
+            "x": 3.151548,
+            "y": 0.5922432,
+            "z": -1.0565387
+          }
+        },
+        {
+          "Position": {
+            "x": 2.28446817,
+            "y": 0.5922432,
+            "z": -1.0387516
+          }
+        },
+        {
+          "Position": {
+            "x": 6.209792,
+            "y": 0.5922431,
+            "z": 0.0367270671
+          }
+        },
+        {
+          "Position": {
+            "x": 5.20935869,
+            "y": 0.5922432,
+            "z": 0.0503845848
+          }
+        },
+        {
+          "Position": {
+            "x": 4.25222635,
+            "y": 0.5922432,
+            "z": 0.036881566
+          }
+        },
+        {
+          "Position": {
+            "x": 3.14975858,
+            "y": 0.5922432,
+            "z": 0.0256605223
+          }
+        },
+        {
+          "Position": {
+            "x": 2.1591332,
+            "y": 0.5922431,
+            "z": 0.00256185536
+          }
+        },
+        {
+          "Position": {
+            "x": -2.77179885,
+            "y": 0.5922427,
+            "z": 6.24148655
+          }
+        },
+        {
+          "Position": {
+            "x": -4.038402,
+            "y": 0.5922427,
+            "z": 6.28272629
+          }
+        },
+        {
+          "Position": {
+            "x": -5.343358,
+            "y": 0.5922427,
+            "z": 6.286806
+          }
+        },
+        {
+          "Position": {
+            "x": -6.568002,
+            "y": 0.5922427,
+            "z": 6.273866
+          }
+        },
+        {
+          "Position": {
+            "x": -6.59244776,
+            "y": 0.5922433,
+            "z": -3.045548
+          }
+        },
+        {
+          "Position": {
+            "x": -5.29631329,
+            "y": 0.5922433,
+            "z": -3.01281118
+          }
+        },
+        {
+          "Position": {
+            "x": -4.02376032,
+            "y": 0.5922433,
+            "z": -3.01361966
+          }
+        },
+        {
+          "Position": {
+            "x": -2.748577,
+            "y": 0.5922433,
+            "z": -3.02258253
+          }
+        },
+        {
+          "Position": {
+            "x": 2.929898,
+            "y": 0.5922427,
+            "z": 6.25844765
+          }
+        },
+        {
+          "Position": {
+            "x": 4.291648,
+            "y": 0.5922427,
+            "z": 6.276919
+          }
+        },
+        {
+          "Position": {
+            "x": 5.51442957,
+            "y": 0.5922427,
+            "z": 6.25581074
+          }
+        },
+        {
+          "Position": {
+            "x": 6.80491066,
+            "y": 0.5922427,
+            "z": 6.235097
+          }
+        },
+        {
+          "Position": {
+            "x": 6.83973646,
+            "y": 0.5922452,
+            "z": -3.03597617
+          }
+        },
+        {
+          "Position": {
+            "x": 5.56302738,
+            "y": 0.5922433,
+            "z": -3.04118562
+          }
+        },
+        {
+          "Position": {
+            "x": 4.25819254,
+            "y": 0.5922433,
+            "z": -3.04784417
+          }
+        },
+        {
+          "Position": {
+            "x": 2.98995614,
+            "y": 0.5922433,
+            "z": -3.04809976
+          }
+        }
+      ]
     },
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -6.80732632,
-        "posY": 1.516099,
-        "posZ": -6.19849825,
-        "rotX": 6.601071E-05,
-        "rotY": 90.0009155,
-        "rotZ": -8.924224E-06,
+        "posX": -6.804921,
+        "posY": 1.51610041,
+        "posZ": -6.235085,
+        "rotX": -6.214902E-05,
+        "rotY": 90.00046,
+        "rotZ": -1.58969988E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -151,19 +769,19 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 3,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    print \"moar tests\"\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif collision_info.collision_object.getPosition()['y'] < self.getPosition()['y'] then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            -- params.position = {collision_info.collision_object.getPosition()['x'], collision_info.collision_object.getPosition()['y'], collision_info.collision_object.getPosition()['z']}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "a0f471"
     },
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -4.186697,
-        "posY": 1.51611722,
-        "posZ": -6.2033143,
-        "rotX": -0.0013108151,
-        "rotY": 90.0017242,
-        "rotZ": -1.2520728E-05,
+        "posX": -4.2916584,
+        "posY": 1.51610017,
+        "posZ": -6.27691126,
+        "rotX": -4.73769933E-06,
+        "rotY": 90.0013351,
+        "rotZ": -1.7220674E-07,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -189,12 +807,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -2.89170456,
-        "posY": 1.5160892,
-        "posZ": -6.32279158,
-        "rotX": 0.000789458165,
-        "rotY": 89.99945,
-        "rotZ": -5.328685E-06,
+        "posX": -2.929909,
+        "posY": 1.51610029,
+        "posZ": -6.2584424,
+        "rotX": -2.15566961E-05,
+        "rotY": 89.99873,
+        "rotZ": -3.294221E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -220,12 +838,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -5.455957,
-        "posY": 1.5161,
-        "posZ": -6.224965,
-        "rotX": -1.4202541E-05,
-        "rotY": 90.00288,
-        "rotZ": 1.87090563E-06,
+        "posX": -5.51444054,
+        "posY": 1.51610029,
+        "posZ": -6.255801,
+        "rotX": -3.27957168E-05,
+        "rotY": 90.00299,
+        "rotZ": -1.18179887E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -251,12 +869,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 5.30500174,
-        "posY": 1.51610112,
-        "posZ": 2.99083114,
-        "rotX": -4.74120043E-06,
-        "rotY": 90.00046,
-        "rotZ": -9.684127E-06,
+        "posX": 5.29631853,
+        "posY": 1.51610136,
+        "posZ": 3.012802,
+        "rotX": -2.10095659E-05,
+        "rotY": 89.9997559,
+        "rotZ": -7.576976E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -282,12 +900,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 2.742072,
-        "posY": 1.51610065,
-        "posZ": 3.08459568,
-        "rotX": -1.28322963E-05,
-        "rotY": 90.00148,
-        "rotZ": -4.41832435E-06,
+        "posX": 2.748583,
+        "posY": 1.5161016,
+        "posZ": 3.02257156,
+        "rotX": -1.01533969E-05,
+        "rotY": 90.00004,
+        "rotZ": 2.44902776E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -313,12 +931,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 4.07374954,
-        "posY": 1.51610065,
-        "posZ": 3.05640817,
-        "rotX": 2.17879242E-05,
-        "rotY": 90.00252,
-        "rotZ": -7.227523E-06,
+        "posX": 4.02376556,
+        "posY": 1.51610136,
+        "posZ": 3.01361227,
+        "rotX": -2.07583071E-05,
+        "rotY": 90.00234,
+        "rotZ": -4.49640538E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -344,12 +962,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 6.61235332,
-        "posY": 1.51609993,
-        "posZ": 2.99253631,
-        "rotX": 7.739757E-05,
-        "rotY": 90.00085,
-        "rotZ": -2.353465E-05,
+        "posX": 6.592453,
+        "posY": 1.51610148,
+        "posZ": 3.04553628,
+        "rotX": -6.407564E-05,
+        "rotY": 90.0011749,
+        "rotZ": -6.9126495E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -375,12 +993,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -4.20275068,
-        "posY": 1.51610088,
-        "posZ": 2.99757075,
-        "rotX": -5.744543E-06,
-        "rotY": 89.99477,
-        "rotZ": 2.78298421E-06,
+        "posX": -4.25818729,
+        "posY": 1.51610136,
+        "posZ": 3.047852,
+        "rotX": -2.28621757E-05,
+        "rotY": 89.99483,
+        "rotZ": -5.089227E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -406,12 +1024,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -5.457734,
+        "posX": -5.56302261,
         "posY": 1.51610112,
-        "posZ": 3.02196264,
-        "rotX": -6.68576558E-06,
-        "rotY": 89.9993057,
-        "rotZ": -2.660796E-05,
+        "posZ": 3.04119539,
+        "rotX": 6.257602E-06,
+        "rotY": 89.99909,
+        "rotZ": 1.88064621E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -437,12 +1055,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -6.680397,
-        "posY": 1.51610112,
-        "posZ": 2.9235723,
-        "rotX": -2.52310874E-05,
-        "rotY": 90.00241,
-        "rotZ": 1.39343019E-05,
+        "posX": -6.83973074,
+        "posY": 1.51610124,
+        "posZ": 3.035988,
+        "rotX": -4.14437136E-06,
+        "rotY": 90.00177,
+        "rotZ": -1.51246277E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -468,12 +1086,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -2.92869568,
-        "posY": 1.51610088,
-        "posZ": 3.008407,
-        "rotX": -2.36976648E-05,
-        "rotY": 90.00174,
-        "rotZ": -1.82271851E-05,
+        "posX": -2.989951,
+        "posY": 1.51610136,
+        "posZ": 3.04810524,
+        "rotX": -6.483608E-06,
+        "rotY": 90.00135,
+        "rotZ": -3.13115925E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -499,12 +1117,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 6.60172,
-        "posY": 1.51609838,
-        "posZ": -6.237707,
-        "rotX": 8.392302E-05,
-        "rotY": 90.00244,
-        "rotZ": -1.75364312E-05,
+        "posX": 6.56799126,
+        "posY": 1.51610029,
+        "posZ": -6.27387762,
+        "rotX": -1.70981584E-05,
+        "rotY": 90.0014954,
+        "rotZ": -1.93248125E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -530,12 +1148,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 2.761277,
-        "posY": 1.51609993,
-        "posZ": -6.272241,
-        "rotX": -1.69238083E-05,
-        "rotY": 90.0038,
-        "rotZ": -2.6618327E-06,
+        "posX": 2.77178645,
+        "posY": 1.5161,
+        "posZ": -6.24149227,
+        "rotX": -8.663081E-06,
+        "rotY": 90.00362,
+        "rotZ": 2.84494172E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -554,19 +1172,19 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 5,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif collision_info.collision_object.getPosition()['y'] < self.getPosition()['y'] then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            -- params.position = {collision_info.collision_object.getPosition()['x'], collision_info.collision_object.getPosition()['y'], collision_info.collision_object.getPosition()['z']}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "76d966"
     },
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 5.29111528,
-        "posY": 1.51610029,
-        "posZ": -6.284484,
-        "rotX": -1.54512763E-05,
-        "rotY": 90.00513,
-        "rotZ": 2.16888839E-06,
+        "posX": 5.34334755,
+        "posY": 1.51609969,
+        "posZ": -6.286815,
+        "rotX": -1.02828358E-06,
+        "rotY": 90.00499,
+        "rotZ": 2.10350413E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -592,12 +1210,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 4.03216267,
-        "posY": 1.51610017,
-        "posZ": -6.271626,
-        "rotX": -2.970515E-05,
-        "rotY": 90.00352,
-        "rotZ": -1.321766E-05,
+        "posX": 4.038391,
+        "posY": 1.51610041,
+        "posZ": -6.28273344,
+        "rotX": -5.75585727E-05,
+        "rotY": 90.00317,
+        "rotZ": -4.660284E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -616,9 +1234,287 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 5,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif collision_info.collision_object.getPosition()['y'] < self.getPosition()['y'] then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            -- params.position = {collision_info.collision_object.getPosition()['x'], collision_info.collision_object.getPosition()['y'], collision_info.collision_object.getPosition()['z']}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "0c4967"
+    },
+    {
+      "Name": "Infinite_Bag",
+      "Transform": {
+        "posX": -10.7517662,
+        "posY": 0.9430013,
+        "posZ": 10.2091713,
+        "rotX": -9.489881E-06,
+        "rotY": 0.0025418133,
+        "rotZ": 3.172833E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.3058885,
+        "g": 0.372555166,
+        "b": 1.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": -1,
+      "MeshIndex": -1,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "ContainedObjects": [
+        {
+          "Name": "BlockSquare",
+          "Transform": {
+            "posX": -9.511935,
+            "posY": 2.07518721,
+            "posZ": 8.97605,
+            "rotX": 357.712921,
+            "rotY": 359.924683,
+            "rotZ": 357.5454,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "wall",
+          "Description": "",
+          "ColorDiffuse": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0
+          },
+          "Locked": false,
+          "Grid": true,
+          "Snap": true,
+          "Autoraise": true,
+          "Sticky": true,
+          "Tooltip": true,
+          "LuaScript": "",
+          "LuaScriptState": "",
+          "GUID": "9eff90"
+        }
+      ],
+      "GUID": "2aa177"
+    },
+    {
+      "Name": "Bag",
+      "Transform": {
+        "posX": 10.3432245,
+        "posY": 0.7749669,
+        "posZ": -10.4522257,
+        "rotX": -1.96601377E-06,
+        "rotY": 9.3715E-06,
+        "rotZ": -1.37070708E-06,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 0.7058823,
+        "g": 0.366520882,
+        "b": 0.0
+      },
+      "Locked": false,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": -1,
+      "MeshIndex": -1,
+      "Number": 0,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "7aae0a"
+    },
+    {
+      "Name": "ScriptingTrigger",
+      "Transform": {
+        "posX": 0.0277291536,
+        "posY": 4.06426764,
+        "posZ": 0.0436919332,
+        "rotX": 0.0,
+        "rotY": 270.337952,
+        "rotZ": 0.0,
+        "scaleX": 3.1655736,
+        "scaleY": 5.1,
+        "scaleZ": 2.99643779
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "Locked": true,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "a2fb3d"
+    },
+    {
+      "Name": "Die_6",
+      "Transform": {
+        "posX": -1.82100976,
+        "posY": 1.29020154,
+        "posZ": -10.281373,
+        "rotX": 90.0,
+        "rotY": 323.1911,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "Locked": false,
+      "Grid": false,
+      "Snap": false,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "MaterialIndex": 0,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "e18fc7"
+    },
+    {
+      "Name": "ScriptingTrigger",
+      "Transform": {
+        "posX": 4.702789,
+        "posY": 4.064268,
+        "posZ": 3.14603329,
+        "rotX": 0.0,
+        "rotY": 270.337952,
+        "rotZ": 0.0,
+        "scaleX": 1.57332957,
+        "scaleY": 5.1,
+        "scaleZ": 5.023602
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "Locked": true,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "e1e870"
+    },
+    {
+      "Name": "ScriptingTrigger",
+      "Transform": {
+        "posX": 4.67892075,
+        "posY": 4.064267,
+        "posZ": -6.23215866,
+        "rotX": 0.0,
+        "rotY": 270.337952,
+        "rotZ": 0.0,
+        "scaleX": 1.68972123,
+        "scaleY": 5.1,
+        "scaleZ": 4.99686861
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "Locked": true,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "88711a"
+    },
+    {
+      "Name": "ScriptingTrigger",
+      "Transform": {
+        "posX": -4.98761559,
+        "posY": 4.064267,
+        "posZ": -6.231113,
+        "rotX": 0.0,
+        "rotY": 270.337952,
+        "rotZ": 0.0,
+        "scaleX": 1.76623607,
+        "scaleY": 5.1,
+        "scaleZ": 5.01986027
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "Locked": true,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "6769bb"
+    },
+    {
+      "Name": "ScriptingTrigger",
+      "Transform": {
+        "posX": -4.53281927,
+        "posY": 4.064268,
+        "posZ": 2.93047357,
+        "rotX": 0.0,
+        "rotY": 270.337952,
+        "rotZ": 0.0,
+        "scaleX": 1.15182722,
+        "scaleY": 5.1,
+        "scaleZ": 4.842034
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "Locked": true,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "63c0ec"
     }
   ],
   "DecalPallet": [],
