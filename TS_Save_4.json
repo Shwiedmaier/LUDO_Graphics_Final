@@ -1,13 +1,13 @@
 {
   "SaveName": "Ludo_TTS",
   "GameMode": "Ludo_TTS",
-  "Date": "5/14/2017 1:33:24 AM",
+  "Date": "5/14/2017 10:10:21 AM",
   "Table": "Table_Square",
   "Sky": "Sky_Cathedral",
   "Note": "",
   "Rules": "",
   "PlayerTurn": "",
-  "LuaScript": "board = \"9f2659\"\nbag = \"2aa177\"\npieceBag = \"7aae0a\"\nplayers = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nwalls = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\n\nstartingZones = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nstartingZones[\"Blue\"] = \"88711a\"\nstartingZones[\"Green\"] = \"63c0ec\"\nstartingZones[\"Yellow\"] = \"6769bb\"\nstartingZones[\"Red\"] = \"e1e870\"\n\ndie = \"e18fc7\"\nroll = nil\n\nsPos = {}\n\nlastHeld = nil\n\nplayers[\"Red\"] = {\"d11444\", \"06e2ed\", \"9bd478\", \"dd392c\"}\nplayers[\"Green\"] = {\"59d3f0\", \"51d02b\", \"05a7b5\", \"8e7868\"}\nplayers[\"Blue\"] = {\"58b3d5\", \"21ba3b\", \"0c4967\", \"76d966\"}\nplayers[\"Yellow\"] = {\"4458db\", \"b8df3f\", \"a9658e\", \"a0f471\"}\n\ncurrentPlayer = nil\npreviousPlayer = nil\n\nwallPickupPosition = nil\n\nwinZone = \"a2fb3d\"\nobjectInWinZone = false\n\nfunction onLoad(save_state)\n    print \"test\"\n    sPos = {}\n    -- set current player to first from list of seated, since host always goes first\n    currentPlayer = getSeatedPlayers()[1]\nend\n\nfunction onObjectPickedUp(player_color, picked_up_object)\n    lastHeld = picked_up_object\n\n    if isPlayersPiece(player_color, picked_up_object) and currentPlayer == player_color then\n        print \"woohoo\"\n    elseif isPlayersWall(player_color, picked_up_object) and currentPlayer == player_color then\n        wallPickupPosition = picked_up_object.getPosition()\n    else picked_up_object.reload() end\nend\n\nfunction onObjectDropped(player_color, dropped_object)\n    if isPlayersWall(player_color, dropped_object) and getWallMoveDistance(dropped_object, wallPickupPosition) then\n        pieces = getObjectFromGUID(pieceBag).getObjects()\n        local count = 0\n\n        for i = 1, tableLength(pieces), 1 do\n            if isPlayersPieceFromGUID(player_color, pieces[i].guid) then\n                params = {}\n\n                if count == 0 then\n                    params.position = wallPickupPosition\n                elseif count == 1 then\n                    params.position = dropped_object.getPosition()\n                else\n                    break\n                end\n\n                params.guid = pieces[i].guid\n                o = getObjectFromGUID(pieceBag).takeObject(params)\n                -- o.setTable(\"startingPos\", sPos[o.getGUID()])\n                count = count + 1\n            end\n        end\n\n        dropped_object.destruct()\n    elseif isPlayersPiece(player_color, dropped_object) and objectInWinZone then dropped_object.destruct() end\nend\n\nfunction onPlayerTurnStart(player_color_start, player_color_previous)\n    -- set current player to this player\n    currentPlayer = player_color_start\n\n    -- set previous player to previous player ;)\n    previousPlayer = player_color_previous\n\n    local objectsInStartingZone = getObjectFromGUID(startingZones[\"Blue\"]).getObjects()\n\n    for i = 1, tableLength(objectsInStartingZone), 1 do\n        objectsInStartingZone[i].lock()\n    end\n\n    math.randomseed(os.clock())\n    local dieObject = getObjectFromGUID(die)\n    local dieVal = math.random(1, 6)\n\n    dieObject.setValue(dieVal)\n\n    if dieVal == 6 then\n        for i = 1, tableLength(objectsInStartingZone), 1 do\n            objectsInStartingZone[i].unlock()\n        end\n    end\nend\n\nfunction onObjectEnterScriptingZone(zone, enter_object)\n    if zone.getGUID() == winZone then\n        getObjectFromGUID(winZone).highlightOn({0, 1, 0})\n        objectInWinZone = true\n    end\nend\n\nfunction onObjectLeaveScriptingZone(zone, leave_object)\n    if zone.getGUID() == winZone then\n        getObjectFromGUID(winZone).highlightOff()\n        objectInWinZone = false\n    end\nend\n\nfunction isPlayersPiece(player_color, picked_up_object)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == picked_up_object.getGUID() then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersPieceFromGUID(player_color, object_GUID)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == object_GUID then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersWall(player_color, picked_up_object)\n\n    if walls[player_color] != nil then\n        print(tableLength(walls[player_color]))\n\n        for i = 1, tableLength(walls[player_color]), 1 do\n            if walls[player_color][i] == picked_up_object.getGUID() then\n                return true\n            end\n        end\n    end\n    return false\nend\n\nfunction getWallMoveDistance(wall_object, old_wall_position)\n    print(old_wall_position['x'])\n    print(wall_object.getPosition()['x'])\n    if math.abs(old_wall_position['x'] - wall_object.getPosition()['x']) > 0.6 then return true\n    elseif math.abs(old_wall_position['z'] - wall_object.getPosition()['z']) > 0.6 then return true\n    else return false end\nend\n\nfunction tableLength(T)\n  local count = 0\n  for _ in pairs(T) do count = count + 1 end\n  return count\nend\n",
+  "LuaScript": "board = \"9f2659\"\nbag = \"2aa177\"\npieceBag = \"7aae0a\"\nplayers = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nwalls = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\n\nstartingZones = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nstartingZones[\"Blue\"] = \"88711a\"\nstartingZones[\"Green\"] = \"63c0ec\"\nstartingZones[\"Yellow\"] = \"6769bb\"\nstartingZones[\"Red\"] = \"e1e870\"\n\ndie = \"e18fc7\"\nroll = nil\n\nsPos = {}\n\nlastHeld = nil\n\nplayers[\"Red\"] = {\"d11444\", \"06e2ed\", \"9bd478\", \"dd392c\"}\nplayers[\"Green\"] = {\"59d3f0\", \"51d02b\", \"05a7b5\", \"8e7868\"}\nplayers[\"Blue\"] = {\"58b3d5\", \"21ba3b\", \"0c4967\", \"76d966\"}\nplayers[\"Yellow\"] = {\"4458db\", \"b8df3f\", \"a9658e\", \"a0f471\"}\n\ncurrentPlayer = nil\npreviousPlayer = nil\n\nwallPickupPosition = nil\n\nwinZone = \"f151fe\"\nobjectInWinZone = false\n\nfunction onLoad(save_state)\n    print \"test\"\n    sPos = {}\n    -- set current player to first from list of seated, since host always goes first\n    currentPlayer = getSeatedPlayers()[1]\nend\n\nfunction onObjectPickedUp(player_color, picked_up_object)\n    lastHeld = picked_up_object\n\n    if isPlayersPiece(player_color, picked_up_object) and currentPlayer == player_color then\n        print \"woohoo\"\n    elseif isPlayersWall(player_color, picked_up_object) and currentPlayer == player_color then\n        wallPickupPosition = picked_up_object.getPosition()\n    else picked_up_object.reload() end\nend\n\nfunction onObjectDropped(player_color, dropped_object)\n    if isPlayersWall(player_color, dropped_object) and getWallMoveDistance(dropped_object, wallPickupPosition) then\n        pieces = getObjectFromGUID(pieceBag).getObjects()\n        local count = 0\n\n        for i = 1, tableLength(pieces), 1 do\n            if isPlayersPieceFromGUID(player_color, pieces[i].guid) then\n                params = {}\n\n                if count == 0 then\n                    params.position = wallPickupPosition\n                elseif count == 1 then\n                    params.position = dropped_object.getPosition()\n                else\n                    break\n                end\n\n                params.guid = pieces[i].guid\n                o = getObjectFromGUID(pieceBag).takeObject(params)\n                -- o.setTable(\"startingPos\", sPos[o.getGUID()])\n                count = count + 1\n            end\n        end\n\n        dropped_object.destruct()\n    elseif isPlayersPiece(player_color, dropped_object) and objectInWinZone then dropped_object.destruct() end\nend\n\nfunction onPlayerTurnStart(player_color_start, player_color_previous)\n    -- set current player to this player\n    currentPlayer = player_color_start\n\n    -- set previous player to previous player ;)\n    previousPlayer = player_color_previous\n\n    local objectsInStartingZone = getObjectFromGUID(startingZones[\"Blue\"]).getObjects()\n\n    for i = 1, tableLength(objectsInStartingZone), 1 do\n        objectsInStartingZone[i].lock()\n    end\n\n    math.randomseed(os.clock())\n    local dieObject = getObjectFromGUID(die)\n    local dieVal = math.random(1, 6)\n\n    dieObject.setValue(dieVal)\n\n    if dieVal == 6 then\n        for i = 1, tableLength(objectsInStartingZone), 1 do\n            objectsInStartingZone[i].unlock()\n        end\n    end\nend\n\nfunction onObjectEnterScriptingZone(zone, enter_object)\n    if zone.getGUID() == winZone then\n        getObjectFromGUID(winZone).highlightOn({0, 1, 0})\n        objectInWinZone = true\n    end\nend\n\nfunction onObjectLeaveScriptingZone(zone, leave_object)\n    if zone.getGUID() == winZone then\n        getObjectFromGUID(winZone).highlightOff()\n        objectInWinZone = false\n    end\nend\n\nfunction isPlayersPiece(player_color, picked_up_object)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == picked_up_object.getGUID() then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersPieceFromGUID(player_color, object_GUID)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == object_GUID then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersWall(player_color, picked_up_object)\n\n    if walls[player_color] != nil then\n        print(tableLength(walls[player_color]))\n\n        for i = 1, tableLength(walls[player_color]), 1 do\n            if walls[player_color][i] == picked_up_object.getGUID() then\n                return true\n            end\n        end\n    end\n    return false\nend\n\nfunction getWallMoveDistance(wall_object, old_wall_position)\n    print(old_wall_position['x'])\n    print(wall_object.getPosition()['x'])\n    if math.abs(old_wall_position['x'] - wall_object.getPosition()['x']) > 0.6 then return true\n    elseif math.abs(old_wall_position['z'] - wall_object.getPosition()['z']) > 0.6 then return true\n    else return false end\nend\n\nfunction tableLength(T)\n  local count = 0\n  for _ in pairs(T) do count = count + 1 end\n  return count\nend\n",
   "LuaScriptState": "",
   "Grid": {
     "Type": 0,
@@ -31,9 +31,9 @@
       {
         "Color": "Yellow",
         "Transform": {
-          "posX": -0.07143085,
-          "posY": 2.97353363,
-          "posZ": -14.374999,
+          "posX": -0.07143096,
+          "posY": 2.97357178,
+          "posZ": -14.3750134,
           "rotX": 0.0,
           "rotY": 0.33760643,
           "rotZ": 0.0,
@@ -46,7 +46,7 @@
         "Color": "Green",
         "Transform": {
           "posX": -14.3107786,
-          "posY": 2.97353363,
+          "posY": 2.97357178,
           "posZ": 0.02235379,
           "rotX": 0.0,
           "rotY": 90.337616,
@@ -59,11 +59,11 @@
       {
         "Color": "Red",
         "Transform": {
-          "posX": 0.09737999,
-          "posY": 2.97353363,
-          "posZ": 14.2750072,
+          "posX": 0.0973801538,
+          "posY": 2.97357178,
+          "posZ": 14.2750311,
           "rotX": 0.0,
-          "rotY": 180.337784,
+          "rotY": 180.3378,
           "rotZ": 0.0,
           "scaleX": 9.392743,
           "scaleY": 6.63386965,
@@ -74,7 +74,7 @@
         "Color": "Blue",
         "Transform": {
           "posX": 14.3612537,
-          "posY": 2.97353363,
+          "posY": 2.97357178,
           "posZ": 0.0530046746,
           "rotX": 0.0,
           "rotY": 270.337952,
@@ -96,7 +96,7 @@
         "posY": 0.9220247,
         "posZ": 0.0,
         "rotX": 0.0,
-        "rotY": 180.000137,
+        "rotY": 180.000153,
         "rotZ": 0.0,
         "scaleX": 1.0,
         "scaleY": 1.0,
@@ -746,11 +746,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -6.804921,
-        "posY": 1.51610041,
+        "posY": 1.5161,
         "posZ": -6.235085,
-        "rotX": -6.214902E-05,
-        "rotY": 90.00046,
-        "rotZ": -1.58969988E-06,
+        "rotX": -2.34503041E-05,
+        "rotY": 90.00044,
+        "rotZ": -5.225948E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -776,12 +776,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -4.2916584,
+        "posX": -4.291659,
         "posY": 1.51610017,
         "posZ": -6.27691126,
-        "rotX": -4.73769933E-06,
-        "rotY": 90.0013351,
-        "rotZ": -1.7220674E-07,
+        "rotX": -3.415552E-05,
+        "rotY": 90.00128,
+        "rotZ": -2.42347164E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -808,11 +808,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -2.929909,
-        "posY": 1.51610029,
+        "posY": 1.51610041,
         "posZ": -6.2584424,
-        "rotX": -2.15566961E-05,
-        "rotY": 89.99873,
-        "rotZ": -3.294221E-06,
+        "rotX": -2.72341786E-05,
+        "rotY": 89.99866,
+        "rotZ": -5.00975875E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -838,12 +838,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -5.51444054,
-        "posY": 1.51610029,
+        "posX": -5.51444,
+        "posY": 1.51609993,
         "posZ": -6.255801,
-        "rotX": -3.27957168E-05,
-        "rotY": 90.00299,
-        "rotZ": -1.18179887E-05,
+        "rotX": -8.185154E-06,
+        "rotY": 90.0029449,
+        "rotZ": -1.14305931E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -870,11 +870,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 5.29631853,
-        "posY": 1.51610136,
+        "posY": 1.51610124,
         "posZ": 3.012802,
-        "rotX": -2.10095659E-05,
-        "rotY": 89.9997559,
-        "rotZ": -7.576976E-06,
+        "rotX": -9.871615E-06,
+        "rotY": 89.99968,
+        "rotZ": -9.381047E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -902,10 +902,10 @@
       "Transform": {
         "posX": 2.748583,
         "posY": 1.5161016,
-        "posZ": 3.02257156,
-        "rotX": -1.01533969E-05,
-        "rotY": 90.00004,
-        "rotZ": 2.44902776E-06,
+        "posZ": 3.0225718,
+        "rotX": -4.390688E-05,
+        "rotY": 89.99997,
+        "rotZ": -2.54559982E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -934,9 +934,9 @@
         "posX": 4.02376556,
         "posY": 1.51610136,
         "posZ": 3.01361227,
-        "rotX": -2.07583071E-05,
-        "rotY": 90.00234,
-        "rotZ": -4.49640538E-06,
+        "rotX": -2.09116588E-05,
+        "rotY": 90.00235,
+        "rotZ": -1.25383258E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -963,11 +963,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 6.592453,
-        "posY": 1.51610148,
-        "posZ": 3.04553628,
-        "rotX": -6.407564E-05,
-        "rotY": 90.0011749,
-        "rotZ": -6.9126495E-06,
+        "posY": 1.51610112,
+        "posZ": 3.045536,
+        "rotX": -2.44070884E-06,
+        "rotY": 90.00116,
+        "rotZ": -6.77996059E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -994,11 +994,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -4.25818729,
-        "posY": 1.51610136,
+        "posY": 1.516101,
         "posZ": 3.047852,
-        "rotX": -2.28621757E-05,
-        "rotY": 89.99483,
-        "rotZ": -5.089227E-06,
+        "rotX": 9.0577505E-06,
+        "rotY": 89.99485,
+        "rotZ": -5.431429E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1024,12 +1024,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -5.56302261,
-        "posY": 1.51610112,
+        "posX": -5.563023,
+        "posY": 1.51610148,
         "posZ": 3.04119539,
-        "rotX": 6.257602E-06,
-        "rotY": 89.99909,
-        "rotZ": 1.88064621E-06,
+        "rotX": -3.24507964E-05,
+        "rotY": 89.99908,
+        "rotZ": -3.052596E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1056,11 +1056,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -6.83973074,
-        "posY": 1.51610124,
-        "posZ": 3.035988,
-        "rotX": -4.14437136E-06,
-        "rotY": 90.00177,
-        "rotZ": -1.51246277E-05,
+        "posY": 1.51610148,
+        "posZ": 3.03598833,
+        "rotX": -3.55853736E-05,
+        "rotY": 90.00172,
+        "rotZ": -2.98133837E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1086,12 +1086,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -2.989951,
-        "posY": 1.51610136,
-        "posZ": 3.04810524,
-        "rotX": -6.483608E-06,
-        "rotY": 90.00135,
-        "rotZ": -3.13115925E-05,
+        "posX": -2.98995113,
+        "posY": 1.51610148,
+        "posZ": 3.04810548,
+        "rotX": -4.7969872E-05,
+        "rotY": 90.00119,
+        "rotZ": -2.299214E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1117,12 +1117,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 6.56799126,
-        "posY": 1.51610029,
+        "posX": 6.56799173,
+        "posY": 1.51610017,
         "posZ": -6.27387762,
-        "rotX": -1.70981584E-05,
-        "rotY": 90.0014954,
-        "rotZ": -1.93248125E-05,
+        "rotX": -4.93214648E-05,
+        "rotY": 90.00146,
+        "rotZ": 6.407882E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1149,11 +1149,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 2.77178645,
-        "posY": 1.5161,
+        "posY": 1.51609993,
         "posZ": -6.24149227,
-        "rotX": -8.663081E-06,
-        "rotY": 90.00362,
-        "rotZ": 2.84494172E-06,
+        "rotX": -4.81274E-06,
+        "rotY": 90.00359,
+        "rotZ": -1.35293658E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1180,11 +1180,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 5.34334755,
-        "posY": 1.51609969,
+        "posY": 1.51610041,
         "posZ": -6.286815,
-        "rotX": -1.02828358E-06,
-        "rotY": 90.00499,
-        "rotZ": 2.10350413E-06,
+        "rotX": -2.21687515E-05,
+        "rotY": 90.0050049,
+        "rotZ": 2.80887343E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1211,11 +1211,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 4.038391,
-        "posY": 1.51610041,
+        "posY": 1.51610017,
         "posZ": -6.28273344,
-        "rotX": -5.75585727E-05,
-        "rotY": 90.00317,
-        "rotZ": -4.660284E-06,
+        "rotX": -2.89482432E-05,
+        "rotY": 90.0031052,
+        "rotZ": -1.17059035E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1241,12 +1241,12 @@
     {
       "Name": "Infinite_Bag",
       "Transform": {
-        "posX": -10.7517662,
-        "posY": 0.9430013,
-        "posZ": 10.2091713,
-        "rotX": -9.489881E-06,
-        "rotY": 0.0025418133,
-        "rotZ": 3.172833E-06,
+        "posX": -10.75177,
+        "posY": 0.9430001,
+        "posZ": 10.2091742,
+        "rotX": -5.892179E-05,
+        "rotY": 0.00252917525,
+        "rotZ": 0.000106973566,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1305,12 +1305,12 @@
     {
       "Name": "Bag",
       "Transform": {
-        "posX": 10.3432245,
-        "posY": 0.7749669,
-        "posZ": -10.4522257,
-        "rotX": -1.96601377E-06,
-        "rotY": 9.3715E-06,
-        "rotZ": -1.37070708E-06,
+        "posX": 10.3432293,
+        "posY": 0.7749707,
+        "posZ": -10.4522285,
+        "rotX": -1.17060358E-06,
+        "rotY": -4.328899E-06,
+        "rotZ": 2.47961225E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1336,43 +1336,13 @@
       "GUID": "7aae0a"
     },
     {
-      "Name": "ScriptingTrigger",
-      "Transform": {
-        "posX": 0.0277291536,
-        "posY": 4.06426764,
-        "posZ": 0.0436919332,
-        "rotX": 0.0,
-        "rotY": 270.337952,
-        "rotZ": 0.0,
-        "scaleX": 3.1655736,
-        "scaleY": 5.1,
-        "scaleZ": 2.99643779
-      },
-      "Nickname": "",
-      "Description": "",
-      "ColorDiffuse": {
-        "r": 1.0,
-        "g": 1.0,
-        "b": 1.0
-      },
-      "Locked": true,
-      "Grid": true,
-      "Snap": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "GUID": "a2fb3d"
-    },
-    {
       "Name": "Die_6",
       "Transform": {
-        "posX": -1.82100976,
+        "posX": -1.82101071,
         "posY": 1.29020154,
-        "posZ": -10.281373,
-        "rotX": 90.0,
-        "rotY": 323.1911,
+        "posZ": -10.2813749,
+        "rotX": 89.98022,
+        "rotY": 323.191071,
         "rotZ": 0.0,
         "scaleX": 1.0,
         "scaleY": 1.0,
@@ -1515,6 +1485,36 @@
       "LuaScript": "",
       "LuaScriptState": "",
       "GUID": "63c0ec"
+    },
+    {
+      "Name": "ScriptingTrigger",
+      "Transform": {
+        "posX": 0.08155826,
+        "posY": 4.06426764,
+        "posZ": -0.00280785561,
+        "rotX": 0.0,
+        "rotY": 270.337952,
+        "rotZ": 0.0,
+        "scaleX": 2.08451176,
+        "scaleY": 5.1,
+        "scaleZ": 1.77831948
+      },
+      "Nickname": "",
+      "Description": "",
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "Locked": true,
+      "Grid": true,
+      "Snap": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "GUID": "f151fe"
     }
   ],
   "DecalPallet": [],
