@@ -1,13 +1,13 @@
 {
   "SaveName": "Ludo_TTS",
   "GameMode": "Ludo_TTS",
-  "Date": "5/15/2017 6:53:23 PM",
+  "Date": "5/15/2017 6:58:49 PM",
   "Table": "Table_Square",
   "Sky": "Sky_Cathedral",
   "Note": "",
   "Rules": "",
   "PlayerTurn": "TheSpikes",
-  "LuaScript": "board = \"9f2659\"\nbag = \"2ecb94\"\npieceBag = \"7aae0a\"\nplayers = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nwalls = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\n\nstartingZones = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nstartingZones[\"Blue\"] = \"88711a\"\nstartingZones[\"Green\"] = \"63c0ec\"\nstartingZones[\"Yellow\"] = \"6769bb\"\nstartingZones[\"Red\"] = \"e1e870\"\n\ndie = \"e18fc7\"\nroll = nil\n\nsPos = {}\n\nlastHeld = nil\n\nplayers[\"Red\"] = {\"d11444\", \"06e2ed\", \"9bd478\", \"dd392c\"}\nplayers[\"Green\"] = {\"59d3f0\", \"51d02b\", \"05a7b5\", \"8e7868\"}\nplayers[\"Blue\"] = {\"58b3d5\", \"21ba3b\", \"0c4967\", \"76d966\"}\nplayers[\"Yellow\"] = {\"4458db\", \"b8df3f\", \"a9658e\", \"a0f471\"}\n\ncurrentPlayer = nil\npreviousPlayer = nil\n\nwallPickupPosition = nil\n\nwinZone = \"f151fe\"\nobjectInWinZone = false\n\nfunction onLoad(save_state)\n    print \"test\"\n    sPos = {}\n    -- set current player to first from list of seated, since host always goes first\n    currentPlayer = getSeatedPlayers()[1]\nend\n\nfunction onObjectPickedUp(player_color, picked_up_object)\n    lastHeld = picked_up_object\n\n    if isPlayersPiece(player_color, picked_up_object) and currentPlayer == player_color then\n        print \"woohoo\"\n    elseif isPlayersWall(player_color, picked_up_object) and currentPlayer == player_color then\n        wallPickupPosition = picked_up_object.getPosition()\n    else\n        -- picked_up_object.reload() \n    end\nend\n\nfunction onObjectDropped(player_color, dropped_object)\n    if isPlayersWall(player_color, dropped_object) and getWallMoveDistance(dropped_object, wallPickupPosition) then\n        pieces = getObjectFromGUID(pieceBag).getObjects()\n        local count = 0\n\n        for i = 1, tableLength(pieces), 1 do\n            if isPlayersPieceFromGUID(player_color, pieces[i].guid) then\n                params = {}\n\n                if count == 0 then\n                    params.position = wallPickupPosition\n                elseif count == 1 then\n                    params.position = dropped_object.getPosition()\n                else\n                    break\n                end\n\n                params.guid = pieces[i].guid\n                o = getObjectFromGUID(pieceBag).takeObject(params)\n                -- o.setTable(\"startingPos\", sPos[o.getGUID()])\n                count = count + 1\n            end\n        end\n\n        getObjectFromGUID(bag).putObject(dropped_object)\n    elseif isPlayersPiece(player_color, dropped_object) and objectInWinZone then\n         dropped_object.destruct()\n         print \"Test\"\n     end\nend\n\nfunction onPlayerTurnStart(player_color_start, player_color_previous)\n    -- set current player to this player\n    currentPlayer = player_color_start\n\n    -- set previous player to previous player ;)\n    previousPlayer = player_color_previous\n\n    local objectsInStartingZone = getObjectFromGUID(startingZones[currentPlayer]).getObjects()\n\n    for i = 1, tableLength(objectsInStartingZone), 1 do\n        if isPlayersPiece(currentPlayer, objectsInStartingZone[i]) then objectsInStartingZone[i].lock() end\n    end\n\n    math.randomseed(os.clock())\n    local dieObject = getObjectFromGUID(die)\n    local dieVal = nil\n\n    local var1 = math.random(1, 6)\n    local var2 = math.random(1, 6)\n    local var3 = math.random(1, 6)\n\n    if var1 == 6 or var2 == 6 or var3 == 6 then dieVal = 6 else dieVal = var1 end\n\n    dieObject.setValue(dieVal)\n\n    if dieVal == 6 then\n        for i = 1, tableLength(objectsInStartingZone), 1 do\n            if isPlayersPiece(currentPlayer, objectsInStartingZone[i]) then objectsInStartingZone[i].unlock() end\n        end\n    end\nend\n\nfunction onObjectEnterScriptingZone(zone, enter_object)\n    print(zone.getGUID())\n    if zone.getGUID() == winZone then\n        print(walls[currentPlayer][1])\n        print(walls[currentPlayer][2])\n        objectInWinZone = true\n    end\nend\n\nfunction onObjectLeaveScriptingZone(zone, leave_object)\n    if zone.getGUID() == winZone then\n        objectInWinZone = false\n    end\nend\n\nfunction isPlayersPiece(player_color, picked_up_object)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == picked_up_object.getGUID() then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersPieceFromGUID(player_color, object_GUID)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == object_GUID then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersWall(player_color, picked_up_object)\n\n    if walls[player_color] != nil then\n        print(tableLength(walls[player_color]))\n\n        for i = 1, tableLength(walls[player_color]), 1 do\n            if walls[player_color][i] == picked_up_object.getGUID() then\n                return true\n            end\n        end\n    end\n    return false\nend\n\nfunction getWallMoveDistance(wall_object, old_wall_position)\n    print(old_wall_position['x'])\n    print(wall_object.getPosition()['x'])\n    if math.abs(old_wall_position['x'] - wall_object.getPosition()['x']) > 0.6 then return true\n    elseif math.abs(old_wall_position['z'] - wall_object.getPosition()['z']) > 0.6 then return true\n    else return false end\nend\n\nfunction tableLength(T)\n  local count = 0\n  for _ in pairs(T) do count = count + 1 end\n  return count\nend\n",
+  "LuaScript": "board = \"9f2659\"\nbag = \"2ecb94\"\npieceBag = \"7aae0a\"\nplayers = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nwalls = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\n\nstartingZones = {\"Blue\", \"Green\", \"Yellow\", \"Red\"}\nstartingZones[\"Blue\"] = \"88711a\"\nstartingZones[\"Green\"] = \"63c0ec\"\nstartingZones[\"Yellow\"] = \"6769bb\"\nstartingZones[\"Red\"] = \"e1e870\"\n\ndie = \"e18fc7\"\nroll = nil\n\nsPos = {}\n\nlastHeld = nil\n\nplayers[\"Red\"] = {\"d11444\", \"06e2ed\", \"9bd478\", \"dd392c\"}\nplayers[\"Green\"] = {\"59d3f0\", \"51d02b\", \"05a7b5\", \"8e7868\"}\nplayers[\"Blue\"] = {\"58b3d5\", \"21ba3b\", \"0c4967\", \"76d966\"}\nplayers[\"Yellow\"] = {\"4458db\", \"b8df3f\", \"a9658e\", \"a0f471\"}\n\ncurrentPlayer = nil\npreviousPlayer = nil\n\nwallPickupPosition = nil\n\nwinZone = \"f151fe\"\nobjectInWinZone = false\n\nfunction onLoad(save_state)\n    print \"test\"\n    sPos = {}\n    -- set current player to first from list of seated, since host always goes first\n    currentPlayer = getSeatedPlayers()[1]\nend\n\nfunction onObjectPickedUp(player_color, picked_up_object)\n    lastHeld = picked_up_object\n\n    if isPlayersPiece(player_color, picked_up_object) and currentPlayer == player_color then\n        print \"woohoo\"\n    elseif isPlayersWall(player_color, picked_up_object) and currentPlayer == player_color then\n        wallPickupPosition = picked_up_object.getPosition()\n    else\n        picked_up_object.reload()\n    end\nend\n\nfunction onObjectDropped(player_color, dropped_object)\n    if isPlayersWall(player_color, dropped_object) and getWallMoveDistance(dropped_object, wallPickupPosition) then\n        pieces = getObjectFromGUID(pieceBag).getObjects()\n        local count = 0\n\n        for i = 1, tableLength(pieces), 1 do\n            if isPlayersPieceFromGUID(player_color, pieces[i].guid) then\n                params = {}\n\n                if count == 0 then\n                    params.position = wallPickupPosition\n                elseif count == 1 then\n                    params.position = dropped_object.getPosition()\n                else\n                    break\n                end\n\n                params.guid = pieces[i].guid\n                o = getObjectFromGUID(pieceBag).takeObject(params)\n                -- o.setTable(\"startingPos\", sPos[o.getGUID()])\n                count = count + 1\n            end\n        end\n\n        getObjectFromGUID(bag).putObject(dropped_object)\n    elseif isPlayersPiece(player_color, dropped_object) and objectInWinZone then\n         dropped_object.destruct()\n         print \"Test\"\n     end\nend\n\nfunction onPlayerTurnStart(player_color_start, player_color_previous)\n    -- set current player to this player\n    currentPlayer = player_color_start\n\n    -- set previous player to previous player ;)\n    previousPlayer = player_color_previous\n\n    local objectsInStartingZone = getObjectFromGUID(startingZones[currentPlayer]).getObjects()\n\n    for i = 1, tableLength(objectsInStartingZone), 1 do\n        if isPlayersPiece(currentPlayer, objectsInStartingZone[i]) then objectsInStartingZone[i].lock() end\n    end\n\n    math.randomseed(os.clock())\n    local dieObject = getObjectFromGUID(die)\n    local dieVal = nil\n\n    local var1 = math.random(1, 6)\n    local var2 = math.random(1, 6)\n    local var3 = math.random(1, 6)\n\n    if var1 == 6 or var2 == 6 or var3 == 6 then dieVal = 6 else dieVal = var1 end\n\n    dieObject.setValue(dieVal)\n\n    if dieVal == 6 then\n        for i = 1, tableLength(objectsInStartingZone), 1 do\n            if isPlayersPiece(currentPlayer, objectsInStartingZone[i]) then objectsInStartingZone[i].unlock() end\n        end\n    end\nend\n\nfunction onObjectEnterScriptingZone(zone, enter_object)\n    print(zone.getGUID())\n    if zone.getGUID() == winZone then\n        print(walls[currentPlayer][1])\n        print(walls[currentPlayer][2])\n        objectInWinZone = true\n    end\nend\n\nfunction onObjectLeaveScriptingZone(zone, leave_object)\n    if zone.getGUID() == winZone then\n        objectInWinZone = false\n    end\nend\n\nfunction isPlayersPiece(player_color, picked_up_object)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == picked_up_object.getGUID() then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersPieceFromGUID(player_color, object_GUID)\n    for i = 1, 4, 1 do\n        if players[player_color][i] == object_GUID then\n            return true\n        end\n    end\n    return false\nend\n\nfunction isPlayersWall(player_color, picked_up_object)\n\n    if walls[player_color] != nil then\n        print(tableLength(walls[player_color]))\n\n        for i = 1, tableLength(walls[player_color]), 1 do\n            if walls[player_color][i] == picked_up_object.getGUID() then\n                return true\n            end\n        end\n    end\n    return false\nend\n\nfunction getWallMoveDistance(wall_object, old_wall_position)\n    print(old_wall_position['x'])\n    print(wall_object.getPosition()['x'])\n    if math.abs(old_wall_position['x'] - wall_object.getPosition()['x']) > 0.6 then return true\n    elseif math.abs(old_wall_position['z'] - wall_object.getPosition()['z']) > 0.6 then return true\n    else return false end\nend\n\nfunction tableLength(T)\n  local count = 0\n  for _ in pairs(T) do count = count + 1 end\n  return count\nend\n",
   "LuaScriptState": "",
   "Grid": {
     "Type": 0,
@@ -31,9 +31,9 @@
       {
         "Color": "Yellow",
         "Transform": {
-          "posX": -0.07143208,
-          "posY": 2.974018,
-          "posZ": -14.3752022,
+          "posX": -0.07143219,
+          "posY": 2.97406387,
+          "posZ": -14.3752193,
           "rotX": 0.0,
           "rotY": 0.33760643,
           "rotZ": 0.0,
@@ -46,7 +46,7 @@
         "Color": "Green",
         "Transform": {
           "posX": -14.3107786,
-          "posY": 2.974018,
+          "posY": 2.97406387,
           "posZ": 0.02235379,
           "rotX": 0.0,
           "rotY": 90.337616,
@@ -59,22 +59,22 @@
       {
         "Color": "Red",
         "Transform": {
-          "posX": 0.09738077,
-          "posY": 2.974018,
-          "posZ": 14.2753305,
+          "posX": 0.09738094,
+          "posY": 2.97406387,
+          "posZ": 14.2753592,
           "rotX": 0.0,
-          "rotY": 180.33786,
+          "rotY": 180.337875,
           "rotZ": 0.0,
           "scaleX": 9.392743,
           "scaleY": 6.63386965,
-          "scaleZ": 3.522352
+          "scaleZ": 3.522354
         }
       },
       {
         "Color": "Blue",
         "Transform": {
           "posX": 14.3612537,
-          "posY": 2.974018,
+          "posY": 2.97406387,
           "posZ": 0.0530046746,
           "rotX": 0.0,
           "rotY": 270.337952,
@@ -96,7 +96,7 @@
         "posY": 1.00202322,
         "posZ": 2.12447721E-05,
         "rotX": -2.15003056E-05,
-        "rotY": 180.000168,
+        "rotY": 180.000183,
         "rotZ": 6.039968E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
@@ -748,9 +748,9 @@
         "posX": -6.804875,
         "posY": 1.59610057,
         "posZ": -6.235131,
-        "rotX": -5.36735279E-05,
-        "rotY": 89.99948,
-        "rotZ": -2.81077428E-06,
+        "rotX": -4.331261E-05,
+        "rotY": 89.9992752,
+        "rotZ": -3.01473347E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -777,11 +777,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -4.29160833,
-        "posY": 1.59610021,
+        "posY": 1.59610057,
         "posZ": -6.276943,
-        "rotX": -1.00615234E-05,
-        "rotY": 90.00078,
-        "rotZ": 1.43887264E-05,
+        "rotX": -4.06477557E-05,
+        "rotY": 90.0007553,
+        "rotZ": -3.40674387E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -807,12 +807,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": -2.92986321,
-        "posY": 1.59610009,
+        "posX": -2.929863,
+        "posY": 1.59610069,
         "posZ": -6.25844955,
-        "rotX": -2.38314042E-05,
-        "rotY": 89.9977,
-        "rotZ": -1.09264211E-05,
+        "rotX": -6.972979E-05,
+        "rotY": 89.9976349,
+        "rotZ": -1.01495989E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -839,11 +839,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -5.51439571,
-        "posY": 1.59610009,
+        "posY": 1.59610033,
         "posZ": -6.255839,
-        "rotX": -1.02618478E-05,
-        "rotY": 90.00241,
-        "rotZ": -1.39511462E-06,
+        "rotX": -1.73261815E-05,
+        "rotY": 90.0021744,
+        "rotZ": 1.06707E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -869,12 +869,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 5.29625654,
-        "posY": 1.59609914,
-        "posZ": 3.01290369,
-        "rotX": -4.372535E-05,
-        "rotY": 89.9986649,
-        "rotZ": -5.766563E-06,
+        "posX": 5.296257,
+        "posY": 1.59609866,
+        "posZ": 3.01290345,
+        "rotX": -1.87196274E-05,
+        "rotY": 89.99867,
+        "rotZ": 6.372178E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -893,7 +893,7 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 1,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif self.getGUID() == lastHeld.getGUID() and self.getName() != \"wall\" and collision_info.collision_object.getName() != \"wall\" then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "9bd478"
     },
@@ -901,11 +901,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 2.748518,
-        "posY": 1.596099,
+        "posY": 1.59609914,
         "posZ": 3.02263761,
-        "rotX": -2.76609317E-05,
-        "rotY": 89.99879,
-        "rotZ": 2.826643E-06,
+        "rotX": -3.27359448E-05,
+        "rotY": 89.9986,
+        "rotZ": -4.58755E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -924,19 +924,19 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 1,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif self.getGUID() == lastHeld.getGUID() and self.getName() != \"wall\" and collision_info.collision_object.getName() != \"wall\" then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "d11444"
     },
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 4.023706,
-        "posY": 1.59609926,
+        "posX": 4.02370548,
+        "posY": 1.59609866,
         "posZ": 3.013694,
-        "rotX": -4.325844E-05,
-        "rotY": 90.00124,
-        "rotZ": 7.943259E-06,
+        "rotX": -3.19035462E-05,
+        "rotY": 90.00119,
+        "rotZ": 1.11105091E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -955,7 +955,7 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 1,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif self.getGUID() == lastHeld.getGUID() and self.getName() != \"wall\" and collision_info.collision_object.getName() != \"wall\" then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "06e2ed"
     },
@@ -963,11 +963,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 6.59238672,
-        "posY": 1.59609866,
+        "posY": 1.59609818,
         "posZ": 3.045654,
-        "rotX": -2.37969889E-05,
-        "rotY": 90.0,
-        "rotZ": -5.541855E-07,
+        "rotX": -2.46046748E-05,
+        "rotY": 89.9999161,
+        "rotZ": 1.01086089E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -986,7 +986,7 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 1,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif self.getGUID() == lastHeld.getGUID() and self.getName() != \"wall\" and collision_info.collision_object.getName() != \"wall\" then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "dd392c"
     },
@@ -996,9 +996,9 @@
         "posX": -4.258252,
         "posY": 1.59610009,
         "posZ": 3.047839,
-        "rotX": -4.574596E-05,
-        "rotY": 89.99374,
-        "rotZ": 6.212925E-06,
+        "rotX": -5.42559246E-05,
+        "rotY": 89.99362,
+        "rotZ": 1.28825718E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1017,7 +1017,7 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 4,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif self.getGUID() == lastHeld.getGUID() and self.getName() != \"wall\" and collision_info.collision_object.getName() != \"wall\" then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "51d02b"
     },
@@ -1025,11 +1025,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -5.563094,
-        "posY": 1.59609985,
-        "posZ": 3.04116344,
-        "rotX": -9.094552E-06,
-        "rotY": 89.99767,
-        "rotZ": -1.89653449E-07,
+        "posY": 1.59610009,
+        "posZ": 3.04116368,
+        "rotX": -3.13813362E-05,
+        "rotY": 89.99776,
+        "rotZ": -1.33446565E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1048,7 +1048,7 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 4,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif self.getGUID() == lastHeld.getGUID() and self.getName() != \"wall\" and collision_info.collision_object.getName() != \"wall\" then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "05a7b5"
     },
@@ -1056,11 +1056,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -6.839802,
-        "posY": 1.59610021,
+        "posY": 1.5961,
         "posZ": 3.03594446,
-        "rotX": -2.73343649E-05,
+        "rotX": -1.04823994E-05,
         "rotY": 90.00038,
-        "rotZ": 4.548952E-06,
+        "rotZ": 8.760822E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1079,7 +1079,7 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 4,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif self.getGUID() == lastHeld.getGUID() and self.getName() != \"wall\" and collision_info.collision_object.getName() != \"wall\" then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "8e7868"
     },
@@ -1087,11 +1087,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": -2.99001431,
-        "posY": 1.59609962,
+        "posY": 1.59609926,
         "posZ": 3.04810882,
-        "rotX": -2.47214175E-05,
-        "rotY": 90.00007,
-        "rotZ": 3.12465272E-06,
+        "rotX": 1.149644E-06,
+        "rotY": 90.00006,
+        "rotZ": -4.77425374E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1110,19 +1110,19 @@
       "Sticky": true,
       "Tooltip": true,
       "MaterialIndex": 4,
-      "LuaScript": "",
+      "LuaScript": "bag = Global.getVar(\"bag\")\npieceBag = Global.getVar(\"pieceBag\")\nstartingPos = nil\n\nfunction onLoad(save_state)\n    if startingPos == nil then\n        local sPos = Global.getTable(\"sPos\")\n        if sPos[self.getGUID()] != nil then startingPos = sPos[self.getGUID()]\n        else startingPos = self.getPosition() end\n    end\nend\n\nfunction onCollisionEnter(collision_info)\n\n    local lastHeld = Global.getVar(\"lastHeld\")\n\n    if Global.getVar(\"board\") != collision_info.collision_object.getGUID() then\n        if not compareColors(self, collision_info.collision_object) then\n            if collision_info.collision_object.getGUID() == lastHeld.getGUID() then\n                self.setPosition(startingPos, false, true)\n            end\n        elseif self.getGUID() == lastHeld.getGUID() and self.getName() != \"wall\" and collision_info.collision_object.getName() != \"wall\" then\n\n            local sPos = Global.getTable(\"sPos\")\n            sPos[self.getGUID()] = startingPos\n            sPos[collision_info.collision_object.getGUID()] = collision_info.collision_object.getTable(\"startingPos\")\n            Global.setTable(\"sPos\", sPos)\n\n            getObjectFromGUID(pieceBag).putObject(self)\n            getObjectFromGUID(pieceBag).putObject(collision_info.collision_object)\n\n            params = {}\n            params.position = collision_info.collision_object.getPosition()\n            wall = getObjectFromGUID(bag).takeObject(params)\n            wall.setColorTint(collision_info.collision_object.getColorTint())\n\n            walls = Global.getTable(\"walls\")\n            currentPlayer = Global.getVar(\"currentPlayer\")\n\n            if walls[currentPlayer] == nil then walls[currentPlayer] = {} end\n\n            table.insert(walls[currentPlayer], wall.getGUID())\n\n            Global.setTable(\"walls\", walls)\n        end\n    end\nend\n\nfunction setStartingPosition(s)\n    startingPos = s\nend\n\nfunction compareColors(o1, o2)\n    r1 = o1.getColorTint()['r'];\n    g1 = o1.getColorTint()['g'];\n    b1 = o1.getColorTint()['b'];\n\n    r2 = o2.getColorTint()['r'];\n    g2 = o2.getColorTint()['g'];\n    b2 = o2.getColorTint()['b'];\n\n    if r1 == r2 and g1 == g2 and b1 == b2 then return true else return false end\nend\n",
       "LuaScriptState": "",
       "GUID": "59d3f0"
     },
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 6.56804466,
-        "posY": 1.5960989,
+        "posX": 6.568045,
+        "posY": 1.59609962,
         "posZ": -6.27376747,
-        "rotX": -3.534659E-05,
-        "rotY": 90.00098,
-        "rotZ": 1.54025329E-05,
+        "rotX": -5.787123E-05,
+        "rotY": 90.00092,
+        "rotZ": 7.55533E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1148,12 +1148,12 @@
     {
       "Name": "PlayerPawn",
       "Transform": {
-        "posX": 2.77183032,
-        "posY": 1.59609985,
+        "posX": 2.77183056,
+        "posY": 1.59609962,
         "posZ": -6.24143267,
-        "rotX": -2.41131147E-06,
-        "rotY": 90.0032,
-        "rotZ": 4.56251854E-07,
+        "rotX": -4.849023E-05,
+        "rotY": 90.00309,
+        "rotZ": 4.59725652E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1180,11 +1180,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 5.343386,
-        "posY": 1.59609866,
+        "posY": 1.5960995,
         "posZ": -6.286723,
-        "rotX": 1.32648556E-05,
-        "rotY": 90.0046,
-        "rotZ": 5.90791933E-06,
+        "rotX": -4.62886637E-05,
+        "rotY": 90.0045853,
+        "rotZ": -7.482357E-07,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1211,11 +1211,11 @@
       "Name": "PlayerPawn",
       "Transform": {
         "posX": 4.03842831,
-        "posY": 1.59609914,
+        "posY": 1.59609938,
         "posZ": -6.282668,
-        "rotX": -1.87530277E-05,
-        "rotY": 90.002655,
-        "rotZ": 1.35452892E-05,
+        "rotX": -1.14754666E-05,
+        "rotY": 90.00266,
+        "rotZ": 1.19560036E-05,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1241,12 +1241,12 @@
     {
       "Name": "Bag",
       "Transform": {
-        "posX": 10.3432484,
-        "posY": 0.774967,
-        "posZ": -10.4522409,
-        "rotX": -2.34121035E-06,
-        "rotY": -6.761487E-05,
-        "rotZ": -4.740777E-06,
+        "posX": 10.3432541,
+        "posY": 0.774966955,
+        "posZ": -10.4522438,
+        "rotX": 2.73307728E-06,
+        "rotY": -5.181339E-05,
+        "rotZ": 2.06106165E-06,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1274,12 +1274,12 @@
     {
       "Name": "Die_6",
       "Transform": {
-        "posX": -1.81581855,
-        "posY": 1.29019749,
-        "posZ": -10.2827215,
-        "rotX": 2.37654785E-06,
-        "rotY": 8.158859E-05,
-        "rotZ": 89.99999,
+        "posX": -1.81583393,
+        "posY": 1.2901957,
+        "posZ": -10.2824268,
+        "rotX": -7.42052634E-06,
+        "rotY": -4.00156023E-05,
+        "rotZ": 90.00031,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1455,12 +1455,12 @@
     {
       "Name": "Bag",
       "Transform": {
-        "posX": -10.6781378,
-        "posY": 1.77476692,
-        "posZ": 9.91245,
-        "rotX": -0.00307098334,
-        "rotY": 359.992859,
-        "rotZ": 359.9525,
+        "posX": -10.6779718,
+        "posY": 1.7747879,
+        "posZ": 9.912453,
+        "rotX": -0.00126323861,
+        "rotY": 359.992554,
+        "rotZ": 359.961273,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1729,12 +1729,12 @@
     {
       "Name": "BlockRectangle",
       "Transform": {
-        "posX": -10.9422283,
-        "posY": 1.46001685,
-        "posZ": 10.1227379,
-        "rotX": -0.00233883155,
-        "rotY": 0.0012732459,
-        "rotZ": 359.990356,
+        "posX": -10.9422932,
+        "posY": 1.46000743,
+        "posZ": 10.1227531,
+        "rotX": -0.0006031799,
+        "rotY": 0.00134251546,
+        "rotZ": -0.002108672,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
